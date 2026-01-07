@@ -41,6 +41,27 @@ The game is short but intense (approx. 5-10 minutes). Defeat the Human Boss to s
 
 ---
 
+## ⏱️ Timeline: The 1-Hour Sprint
+
+How it was built as a reference for AI-driven development:
+
+*   **0-10m:** Concept brainstorming (Grok).
+*   **10-18m:** Project Initialization (Setting up MD-based file structure for AI context).
+*   **18-20m:** Task Decomposition.
+*   **20-28m:** Core Engine: Graphics initialization & Free movement.
+*   **28-31m:** Combat System (One-shot mechanics).
+*   **31-33m:** Level Transitions (Room logic).
+*   **33-38m:** Enemy Variety & Scaling: Flies → Rats → Cats → Anti-Goose → BOSS. Added health bars and dynamic difficulty.
+*   **38-43m:** Playtesting, Bugfixes, and Main Menu.
+*   **43-46m:** Loot System: Golden Eggs & Upgrades.
+*   **46-50m:** Visual Polish: Animation systems (Friction/Velocity) and procedural models.
+*   **50-53m:** Environmental details: Grass and final fixes.
+*   **53-55m:** Advanced Animation refinement.
+*   **55-57m:** Final stability fixes.
+*   **1h 00m:** Final prompt execution (Bugfixes & Deployment prep).
+
+---
+
 ### 🇷🇺 Описание на русском
 
 Игра была сделана в рамках челленжа **Against the Clock** длительностью в час!
