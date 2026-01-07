@@ -1,0 +1,12 @@
+services:
+  honkrogue:
+    build: .
+    container_name: honkrogue_game
+    restart: unless-stopped
+    ports:
+      - "8090:80" # Maps server port 8090 to container port 80
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

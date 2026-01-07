@@ -1,0 +1,30 @@
+.DS_Store
+node_modules/
+.gemini/
+*.log
+tmp/
+__pycache__/
+*.pyc
+
+# Distribution and builds
+dist/
+
+# Documentation and metadata (as requested)
+
+3D_MIGRATION_PLAN.md
+
+design_specs.md
+
+GEMINI.md
+
+RELEASE_PLAN.md
+
+TODO_STATUS.md
+
+README.md
+
+
+
+# Development scripts
+
+scripts/
