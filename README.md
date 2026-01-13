@@ -1,15 +1,26 @@
 # 🦢 HONK ROGUE 3D: The Goose Retribution
 
-This game was created as part of the **"Against the Clock"** 1-hour challenge!
+This game was created as part of the **"Against the Clock"** challenge, starting with a 1-hour sprint and followed by a 4-hour polish and feature expansion (Total: 5 hours of AI-assisted development).
 
-The goal was to build a functional game within the **Honk Metaverse** (IYKYK) in exactly 60 minutes. This includes everything from development to testing. Once the hour is up, the Gemini CLI (or your favorite AI-powered IDE) is closed. Feel free to join the challenge if you want! XD
+The goal was to build a functional game within the **Honk Metaverse** (IYKYK) in record time. This includes everything from development to testing. Once the time is up, the Gemini CLI (or your favorite AI-powered IDE) is closed. Feel free to join the challenge if you want! XD
 
 ---
 
-### 🕹️ [PLAY NOW!](https://honk.94.140.224.220.sslip.io/)
+### 🕹️ [PLAY 5H EDITION!](https://honkv2.94.140.224.220.sslip.io/)
+*(Original 1h version is still at [honk.94.140.224.220.sslip.io](https://honk.94.140.224.220.sslip.io/))*
 *Note: Limited testing on iOS and Safari. It is highly recommended to use a modern browser (like Chrome) rather than a mobile webview.*
 
 ---
+
+## ✦ Evolution (The +4h Expansion)
+
+After the initial 1-hour prototype, we spent an additional 4 hours on:
+*   **Visual Overhaul:** Detailed procedural models for all enemies (cats with whiskers, slimes with cores, armored bulls).
+*   **Audio System:** Procedural Web Audio API sound effects (Honks, Hits, Dashes).
+*   **Mechanics:** Proper auto-aiming, dash direction correction, and Slime-splitting logic.
+*   **Arena:** Expanded "Infinite-style" island floating in space with starfields.
+*   **Tactical Zoom:** Added a zoom switcher (🔍) with 3 levels: Close, Medium, and Tactical (whole field) for better battle control.
+*   **Stability:** Deep bugfixing of hitboxes, scaling, and state management.
 
 ## ✦ About the Game
 
@@ -35,9 +46,28 @@ You play as a **Battle Goose** seeking vengeance against humanity.
 The game is short but intense (approx. 5-10 minutes). Defeat the Human Boss to see the legendary victory message: **"WINNER WINNER CHICKEN DINNER"**.
 
 ### 🛠️ Technical Specs
-*   **Tech Stack:** Pure Vanilla JS (no React/Vue/Angular).
+*   **Tech Stack:** Pure Vanilla JS (no React/Vue/Angular) with ES6 Modules.
 *   **Deployment:** Wrapped in Docker and deployed with SSL.
 *   **Footprint:** ~200 KB total.
+
+---
+
+## 🛠️ Local Development
+
+Due to the use of ES6 Modules, you **cannot** open `index.html` directly from your file system (`file://` protocol) as it will trigger CORS errors. You must use a local web server.
+
+### 🚀 Quick Start (Python)
+If you have Python installed, use the provided dev server:
+```bash
+python scripts/dev_server.py
+```
+Then open [http://localhost:8080](http://localhost:8080) in your browser.
+
+### 📦 Other Servers
+Alternatively, you can use any static file server:
+*   **Node.js:** `npx serve .`
+*   **PHP:** `php -S localhost:8080`
+
 
 ---
 
@@ -64,9 +94,19 @@ How it was built as a reference for AI-driven development:
 
 ### 🇷🇺 Описание на русском
 
-Игра была сделана в рамках челленжа **Against the Clock** длительностью в час!
+Игра была создана в рамках челленджа **"Against the Clock"**: сначала 1-часовой спринт, а затем 4-часовая полировка и расширение фич (всего 5 часов разработки с ИИ).
 
-Цель — создать игру в Honk метавселенной (кто понял, тот понял) за час. Час дается на всё: и на разработку, и на тестирование. Как только время выходит, ввод в Gemini CLI (или другие ваши реплитокурсоры) закрывается. Можете поучаствовать, если хотите XD
+Цель — создать игру в Honk метавселенной за рекордное время. Этот проект — демонстрация того, как быстро можно пройти путь от идеи до готового продукта с помощью Gemini.
+
+**🕹️ [ИГРАТЬ (5H EDITION)!](https://honkv2.94.140.224.220.sslip.io/)**
+
+**Что изменилось за дополнительные 4 часа:**
+*   **Полный редизайн врагов:** Коты с усами, сегментированные мухи, люди-фермеры, слаймы с ядром.
+*   **Звуковая система:** Процедурная генерация звуков (Хонки, удары, рывки) через Web Audio API.
+*   **Геймплей:** Улучшенный автоприцел, рывок в сторону движения, деление слаймов.
+*   **Атмосфера:** Арена теперь "летает" в космосе со звездным небом.
+*   **Тактический обзор:** Добавлен переключатель зума (🔍) с 3 уровнями (Близко, Средне, Поле боя) для лучшего контроля ситуации.
+*   **Стабильность:** Исправление хитбоксов и логики урона.
 
 **🕹 Геймплей**
 Ты играешь за Боевого Гуся, который мстит человечеству.
