@@ -117,9 +117,20 @@ const playerCallbacks = {
     playSound, applyHitStop, applyShake, vfxList, AttackVFX, enemies,
             spawnFireZone: (pos, damage) => groundEffects.push(new FireZone(scene, pos, damage)),    spawnGroundEffect: (pos, config) => groundEffects.push(new GroundEffect(scene, pos, config)),
     spawnProjectile: (pos, vel, dmg, pierce, options = {}) => {
-        const p = new Projectile(scene, pos, vel, dmg, pierce);
-        Object.assign(p, options);
-        projectiles.push(p); return p;
+        const radius = 0.2;
+        const mesh = new THREE.Mesh(new THREE.SphereGeometry(radius, 8, 8), new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xffffff, emissiveIntensity: 0.5 }));
+        mesh.position.copy(pos);
+        scene.add(mesh);
+        const p = { 
+            mesh, velocity: vel, damage: dmg, pierce, life: 3.0, hitList: [], 
+            startPos: pos.clone(), 
+            critVsFrozen: options.critVsFrozen || false, 
+            sniperLevel: options.sniperLevel || 0,
+            isMagic: false,
+            radius: radius
+        };
+        projectiles.push(p);
+        return p;
     },
     cutGrassAt: (pos, range, dir, dot) => cutGrassAt(THREE, pos, range, grassGrid, grassMesh, cellSize, (x,z)=>getGridIndex(x,z,limit,cellSize,gridCells), dir, dot),
     onGameOver: () => changeGameState(STATE_ENUM.GAMEOVER)
@@ -203,22 +214,19 @@ function triggerNextLevel() {
 
 function startTransitionSequence() {
     player.invulnerable = true;
-    let count = 3;
-    showMessage(`NEXT ROOM IN ${count}...`);
-    playSound('honk', 1.0);
+    showMessage(`LEVEL ${STATE.level} COMPLETE!`);
+    playSound('upgrade', 0.8);
 
-    const interval = setInterval(() => {
-        count--;
-        if (count > 0) {
-            showMessage(`NEXT ROOM IN ${count}...`);
-            playSound('honk', 1.0 + (3-count)*0.2);
-        } else {
-            clearInterval(interval);
-            const fade = document.getElementById('screen-fade');
-            if (fade) fade.style.opacity = '1';
-            setTimeout(() => triggerNextLevel(), 600);
-        }
-    }, 1000);
+    // 2.0s Delay before fade starts
+    setTimeout(() => {
+        const fade = document.getElementById('screen-fade');
+        if (fade) fade.style.opacity = '1';
+        
+        // 0.5s Fade duration (CSS transition is 0.5s)
+        setTimeout(() => {
+            triggerNextLevel();
+        }, 500);
+    }, 2000);
 }
 
 // --- MAIN LOOP ---
@@ -287,7 +295,8 @@ function animate() {
             for (let j = 0; j < enemies.length; j++) {
                 const e = enemies[j];
                 const hitRadius = e.config.hitRadius || 1.0;
-                if (p.mesh.position.distanceToSquared(e.mesh.position) < hitRadius * hitRadius && !e.invulnerable && !p.hitList.includes(e)) {
+                const totalRadius = hitRadius + (p.radius || 0.2);
+                if (p.mesh.position.distanceToSquared(e.mesh.position) < totalRadius * totalRadius && !e.invulnerable && !p.hitList.includes(e)) {
                     if (p.isMagic) { p.explode(scene, enemies, vfxList, AttackVFX); p.remove(scene); projectiles.splice(i, 1); break; }
                     let finalDmg = p.damage;
                     if (p.critVsFrozen && e.hasEffect && e.hasEffect('freeze') && Math.random() < 0.5) finalDmg *= 2;
@@ -319,7 +328,7 @@ function animate() {
                     loot.position.y = 1.0 + Math.sin(loot.userData.time * 3) * 0.3;
                     if (player.mesh.position.distanceTo(new THREE.Vector3(loot.position.x, 0, loot.position.z)) < 1.5) {
                         scene.remove(loot); loot = null;
-                        showUpgradeMenu(player, STATE.level, UPGRADES_REGISTRY, {
+                        showUpgradeMenu(player, STATE.level, {
                             playSound, THREE,
                             onTransitionStart: () => startTransitionSequence(),
                             onUpgradeSelected: () => {

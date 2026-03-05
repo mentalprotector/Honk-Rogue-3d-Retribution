@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { CONFIG, BALANCE } from '../data/config.js';
+import { CONFIG, BALANCE, ENEMY_TYPES } from '../data/config.js';
 
 export class Enemy3D {
     constructor(scene, x, z, typeConfig, callbacks = {}) {
@@ -194,36 +194,55 @@ export class Enemy3D {
                 l1.position.set(-0.1, -0.1, 0.3); l2.position.set(0.1, -0.1, 0.3); headGroup.add(l1); headGroup.add(l2);
             }
             this.tail = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.03, 1.2), catMat); this.tail.position.set(0, 0.6, -0.6); this.tail.rotation.x = Math.PI / 3; this.mesh.add(this.tail);
-        } else if (typeConfig.name === 'Human') {
+        } else if (typeConfig.name === 'Human' || typeConfig.name === 'The Gardener') {
             const pantsMat = new THREE.MeshStandardMaterial({ color: 0x2c3e50 });
             const skinMat = new THREE.MeshStandardMaterial({ color: 0xffccaa });
             const shirtColors = [0xe74c3c, 0x3498db, 0x2ecc71, 0xf1c40f];
-            const shirtMat = new THREE.MeshStandardMaterial({ color: shirtColors[Math.floor(Math.random() * shirtColors.length)] });
-            this.legL = new THREE.Mesh(new THREE.BoxGeometry(0.4, 1.0, 0.4), pantsMat); this.legL.position.set(-0.3, 0.5, 0); this.mesh.add(this.legL);
-            this.legR = new THREE.Mesh(new THREE.BoxGeometry(0.4, 1.0, 0.4), pantsMat); this.legR.position.set(0.3, 0.5, 0); this.mesh.add(this.legR);
-            this.body = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.3, 0.7), shirtMat); this.body.position.set(0, 1.6, 0); this.mesh.add(this.body);
-            const strapL = new THREE.Mesh(new THREE.BoxGeometry(0.2, 1.4, 0.1), pantsMat); strapL.position.set(-0.4, 0, 0.35); this.body.add(strapL);
-            const strapR = strapL.clone(); strapR.position.x = 0.4; this.body.add(strapR);
-            const headGroup = new THREE.Group(); headGroup.position.set(0, 2.5, 0); this.mesh.add(headGroup); this.head = headGroup;
-            headGroup.add(new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.7, 0.7), skinMat));
-            const hatGroup = new THREE.Group(); hatGroup.position.y = 0.4; headGroup.add(hatGroup);
+            const shirtMat = new THREE.MeshStandardMaterial({ color: typeConfig.name === 'The Gardener' ? 0x27ae60 : shirtColors[Math.floor(Math.random() * shirtColors.length)] });
+            this.legL = new THREE.Mesh(new THREE.BoxGeometry(0.4 * typeConfig.scale / 2.0, 1.0 * typeConfig.scale / 2.0, 0.4 * typeConfig.scale / 2.0), pantsMat); this.legL.position.set(-0.3 * typeConfig.scale / 2.0, 0.5 * typeConfig.scale / 2.0, 0); this.mesh.add(this.legL);
+            this.legR = new THREE.Mesh(new THREE.BoxGeometry(0.4 * typeConfig.scale / 2.0, 1.0 * typeConfig.scale / 2.0, 0.4 * typeConfig.scale / 2.0), pantsMat); this.legR.position.set(0.3 * typeConfig.scale / 2.0, 0.5 * typeConfig.scale / 2.0, 0); this.mesh.add(this.legR);
+            this.body = new THREE.Mesh(new THREE.BoxGeometry(1.2 * typeConfig.scale / 2.0, 1.3 * typeConfig.scale / 2.0, 0.7 * typeConfig.scale / 2.0), shirtMat); this.body.position.set(0, 1.6 * typeConfig.scale / 2.0, 0); this.mesh.add(this.body);
+            const strapL = new THREE.Mesh(new THREE.BoxGeometry(0.2 * typeConfig.scale / 2.0, 1.4 * typeConfig.scale / 2.0, 0.1 * typeConfig.scale / 2.0), pantsMat); strapL.position.set(-0.4 * typeConfig.scale / 2.0, 0, 0.35 * typeConfig.scale / 2.0); this.body.add(strapL);
+            const strapR = strapL.clone(); strapR.position.x = 0.4 * typeConfig.scale / 2.0; this.body.add(strapR);
+            const headGroup = new THREE.Group(); headGroup.position.set(0, 2.5 * typeConfig.scale / 2.0, 0); this.mesh.add(headGroup); this.head = headGroup;
+            headGroup.add(new THREE.Mesh(new THREE.BoxGeometry(0.7 * typeConfig.scale / 2.0, 0.7 * typeConfig.scale / 2.0, 0.7 * typeConfig.scale / 2.0), skinMat));
+            const hatGroup = new THREE.Group(); hatGroup.position.y = 0.4 * typeConfig.scale / 2.0; headGroup.add(hatGroup);
             const hatMat = new THREE.MeshStandardMaterial({ color: 0xf1c40f });
-            hatGroup.add(new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, 0.05, 16), hatMat));
-            const hatTop = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.45, 0.3, 16), hatMat); hatTop.position.y = 0.15; hatGroup.add(hatTop);
-            const eyeGeo = new THREE.SphereGeometry(0.05, 8, 8); const eyeMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
-            const eL = new THREE.Mesh(eyeGeo, eyeMat); eL.position.set(-0.2, 0.1, 0.35); headGroup.children[0].add(eL);
-            const eR = eL.clone(); eR.position.x = 0.2; headGroup.children[0].add(eR);
-            this.armL = new THREE.Mesh(new THREE.BoxGeometry(0.3, 1.0, 0.3), skinMat); this.armL.position.set(-0.8, 1.8, 0); this.mesh.add(this.armL);
-            this.armR = new THREE.Mesh(new THREE.BoxGeometry(0.3, 1.0, 0.3), skinMat); this.armR.position.set(0.8, 1.8, 0); this.mesh.add(this.armR);
-            const sL = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.4, 0.35), shirtMat); sL.position.y = 0.3; this.armL.add(sL);
+            hatGroup.add(new THREE.Mesh(new THREE.CylinderGeometry(0.8 * typeConfig.scale / 2.0, 0.8 * typeConfig.scale / 2.0, 0.05 * typeConfig.scale / 2.0, 16), hatMat));
+            const hatTop = new THREE.Mesh(new THREE.CylinderGeometry(0.4 * typeConfig.scale / 2.0, 0.45 * typeConfig.scale / 2.0, 0.3 * typeConfig.scale / 2.0, 16), hatMat); hatTop.position.y = 0.15 * typeConfig.scale / 2.0; hatGroup.add(hatTop);
+            const eyeGeo = new THREE.SphereGeometry(0.05 * typeConfig.scale / 2.0, 8, 8); const eyeMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+            const eL = new THREE.Mesh(eyeGeo, eyeMat); eL.position.set(-0.2 * typeConfig.scale / 2.0, 0.1 * typeConfig.scale / 2.0, 0.35 * typeConfig.scale / 2.0); headGroup.children[0].add(eL);
+            const eR = eL.clone(); eR.position.x = 0.2 * typeConfig.scale / 2.0; headGroup.children[0].add(eR);
+            this.armL = new THREE.Mesh(new THREE.BoxGeometry(0.3 * typeConfig.scale / 2.0, 1.0 * typeConfig.scale / 2.0, 0.3 * typeConfig.scale / 2.0), skinMat); this.armL.position.set(-0.8 * typeConfig.scale / 2.0, 1.8 * typeConfig.scale / 2.0, 0); this.mesh.add(this.armL);
+            this.armR = new THREE.Mesh(new THREE.BoxGeometry(0.3 * typeConfig.scale / 2.0, 1.0 * typeConfig.scale / 2.0, 0.3 * typeConfig.scale / 2.0), skinMat); this.armR.position.set(0.8 * typeConfig.scale / 2.0, 1.8 * typeConfig.scale / 2.0, 0); this.mesh.add(this.armR);
+            const sL = new THREE.Mesh(new THREE.BoxGeometry(0.35 * typeConfig.scale / 2.0, 0.4 * typeConfig.scale / 2.0, 0.35 * typeConfig.scale / 2.0), shirtMat); sL.position.y = 0.3 * typeConfig.scale / 2.0; this.armL.add(sL);
             const sR = sL.clone(); this.armR.add(sR);
-            const rakeGroup = new THREE.Group(); rakeGroup.position.set(0, -0.4, 0.6); rakeGroup.rotation.x = Math.PI / 4; this.armR.add(rakeGroup);
-            const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 3.0), new THREE.MeshStandardMaterial({ color: 0x8e44ad }));
+            const rakeGroup = new THREE.Group(); rakeGroup.position.set(0, -0.4 * typeConfig.scale / 2.0, 0.6 * typeConfig.scale / 2.0); rakeGroup.rotation.x = Math.PI / 4; this.armR.add(rakeGroup);
+            const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.06 * typeConfig.scale / 2.0, 0.06 * typeConfig.scale / 2.0, 3.0 * typeConfig.scale / 2.0), new THREE.MeshStandardMaterial({ color: 0x8e44ad }));
             handle.rotation.x = Math.PI / 2; rakeGroup.add(handle);
-            const headBar = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.12, 0.12), new THREE.MeshStandardMaterial({ color: 0x95a5a6 })); headBar.position.z = 1.5; rakeGroup.add(headBar);
+            const headBar = new THREE.Mesh(new THREE.BoxGeometry(1.0 * typeConfig.scale / 2.0, 0.12 * typeConfig.scale / 2.0, 0.12 * typeConfig.scale / 2.0), new THREE.MeshStandardMaterial({ color: 0x95a5a6 })); headBar.position.z = 1.5 * typeConfig.scale / 2.0; rakeGroup.add(headBar);
             for(let i=0; i<7; i++) {
-                const tooth = new THREE.Mesh(new THREE.ConeGeometry(0.03, 0.4, 4), new THREE.MeshStandardMaterial({ color: 0x95a5a6 }));
-                tooth.position.set((i-3)*0.15, -0.2, 1.5); tooth.rotation.x = Math.PI; rakeGroup.add(tooth);
+                const tooth = new THREE.Mesh(new THREE.ConeGeometry(0.03 * typeConfig.scale / 2.0, 0.4 * typeConfig.scale / 2.0, 4), new THREE.MeshStandardMaterial({ color: 0x95a5a6 }));
+                tooth.position.set((i-3)*0.15 * typeConfig.scale / 2.0, -0.2 * typeConfig.scale / 2.0, 1.5 * typeConfig.scale / 2.0); tooth.rotation.x = Math.PI; rakeGroup.add(tooth);
+            }
+        } else if (typeConfig.name === 'Spitter Plant') {
+            const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.15, 0.6, 8), new THREE.MeshStandardMaterial({ color: 0x2ecc71 }));
+            stem.position.y = 0.3; this.mesh.add(stem); this.body = stem;
+            const head = new THREE.Mesh(new THREE.SphereGeometry(0.35, 12, 12), new THREE.MeshStandardMaterial({ color: 0xe74c3c }));
+            head.position.y = 0.6; this.mesh.add(head); this.head = head;
+            const mouth = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.2, 8), new THREE.MeshStandardMaterial({ color: 0x550000 }));
+            mouth.rotation.x = Math.PI / 2; mouth.position.z = 0.25; head.add(mouth);
+            // Leaves
+            const leafGeo = new THREE.ConeGeometry(0.2, 0.6, 4); leafGeo.scale(1, 0.2, 1);
+            const leafMat = new THREE.MeshStandardMaterial({ color: 0x27ae60 });
+            for(let i=0; i<4; i++) {
+                const leaf = new THREE.Mesh(leafGeo, leafMat);
+                leaf.position.y = 0.1;
+                leaf.rotation.y = (i/4)*Math.PI*2;
+                leaf.rotation.x = Math.PI/3;
+                leaf.position.x = Math.sin((i/4)*Math.PI*2)*0.3;
+                leaf.position.z = Math.cos((i/4)*Math.PI*2)*0.3;
+                this.mesh.add(leaf);
             }
         } else if (typeConfig.name === 'Wild Boar') {
             const body = new THREE.Mesh(new THREE.BoxGeometry(typeConfig.scale * 1.2, typeConfig.scale * 0.9, typeConfig.scale * 1.8), mat);
@@ -364,7 +383,7 @@ export class Enemy3D {
             if (this.explosionTimer <= 0) {
                 if (this.callbacks.vfxList) {
                     // Larger, bright explosive VFX
-                    this.callbacks.vfxList.push(new this.callbacks.AttackVFX(this.scene, this.mesh.position, null, 4.5, Math.PI*2, 0xff4400, 0.4));
+                    this.callbacks.vfxList.push(new this.callbacks.AttackVFX(this.scene, this.mesh.position, null, 5.0, Math.PI*2, 0xff4400, 0.4));
                     // Additional particles for impact
                     for(let i=0; i<20; i++) {
                         const color = Math.random() > 0.5 ? 0xff4400 : 0xffcc00;
@@ -473,7 +492,7 @@ export class Enemy3D {
             }
             this.healthBarGroup.lookAt(camera.position); return true; 
         }
-        if (distToPlayer < (this.config.hitRadius || 1.0) + 1.0 && this.attackCooldown <= 0 && !['Slime', 'Micro-Slime', 'Bull'].includes(this.config.name)) {
+        if (distToPlayer < (this.config.hitRadius || 1.0) + 1.0 && this.attackCooldown <= 0 && !['Slime', 'Micro-Slime', 'Bull', 'Wild Boar', 'The Gardener', 'Spitter Plant'].includes(this.config.name)) {
             this.isAttacking = true; this.attackWindUp = 0;
         }
         return false;
@@ -502,14 +521,148 @@ export class Enemy3D {
                     }, 600);
                 }
             } else { this.speed = this.config.speed; }
+        } else if (this.config.name === 'Spitter Plant') {
+            this.speed = 0;
+            if (this.head) this.head.lookAt(playerPosition);
+            if (!this.lastSpit) this.lastSpit = Date.now();
+            if (Date.now() - this.lastSpit > 2000) {
+                this.lastSpit = Date.now();
+                if (this.head) this.head.scale.setScalar(1.3);
+                setTimeout(() => { if (this.head) this.head.scale.setScalar(1.0); }, 200);
+                if (this.callbacks.projectiles) {
+                    const dir = new this.THREE.Vector3().subVectors(playerPosition, this.mesh.position).normalize();
+                    const p = new this.callbacks.Projectile(this.scene, this.mesh.position.clone().add(new this.THREE.Vector3(0,0.6,0)), dir.multiplyScalar(6), 1);
+                    if(p.mesh.geometry) p.mesh.geometry.dispose(); p.mesh.geometry = new this.THREE.SphereGeometry(0.25, 16, 16);
+                    p.mesh.material.color.setHex(0xe74c3c); p.isEnemy = true; this.callbacks.projectiles.push(p);
+                }
+            }
+            return true;
+        } else if (this.config.name === 'The Gardener') {
+            if (!this.state) { this.state = 'idle'; this.activePlants = []; }
+            if (!this.timer) this.timer = 0;
+            this.timer += dt;
+            if (!this.plantCooldown) this.plantCooldown = 0;
+            if (this.plantCooldown > 0) this.plantCooldown -= dt;
+            
+            // Clean dead plants
+            this.activePlants = this.activePlants.filter(p => p.hp > 0);
+
+            // Phase 2
+            const isEnraged = this.hp < this.maxHp * 0.5;
+            if (isEnraged) {
+                this.speed = this.config.speed * 1.2;
+                if (Math.floor(time * 10) % 2 === 0) this.body.material.emissive.setHex(0xff0000);
+                else this.body.material.emissive.setHex(0x000000);
+            } else {
+                this.speed = this.config.speed;
+            }
+
+            if (this.state === 'idle') {
+                if (distToPlayer < 3.5 && this.activeEffects.length === 0) {
+                    // Rake Sweep
+                    this.state = 'sweep_winding'; this.timer = 0;
+                } else if (distToPlayer > 4.0 && this.plantCooldown <= 0 && this.activePlants.length < 3) {
+                    // Summon Plant
+                    this.state = 'summoning'; this.timer = 0;
+                }
+            } else if (this.state === 'sweep_winding') {
+                this.speed = 0;
+                this.mesh.lookAt(playerPosition);
+                if (this.armR) {
+                    this.armR.rotation.z = Math.PI / 2; // Raise rake sideways
+                    this.armR.rotation.y = -Math.PI / 4 + (this.timer / 0.8) * Math.PI / 2;
+                }
+                if (this.timer > 0.8) {
+                    this.state = 'sweeping'; this.timer = 0;
+                    // Execute Sweep
+                    if (this.callbacks.applyShake) this.callbacks.applyShake(0.3, 0.2);
+                    // VFX
+                    const forward = new this.THREE.Vector3(0,0,1).applyQuaternion(this.mesh.quaternion);
+                    if (this.callbacks.vfxList) {
+                        this.callbacks.vfxList.push(new this.callbacks.AttackVFX(this.scene, this.mesh.position, null, 3.5, Math.PI * 0.8, 0xffffff, 0.2));
+                    }
+                    // Hit Check
+                    const angle = Math.PI * 0.8; // 144 degrees
+                    if (distToPlayer < 3.5) {
+                        const toPlayer = new this.THREE.Vector3().subVectors(playerPosition, this.mesh.position).normalize();
+                        if (forward.dot(toPlayer) > Math.cos(angle/2)) {
+                            if (!this.callbacks.player.invulnerable && !this.callbacks.player.isDashing) {
+                                this.callbacks.player.takeDamage(1, this);
+                                const push = toPlayer.clone().multiplyScalar(15.0);
+                                this.callbacks.player.velocity.add(push);
+                            }
+                        }
+                    }
+                }
+            } else if (this.state === 'sweeping') {
+                this.speed = 0;
+                if (this.armR) {
+                    this.armR.rotation.y = Math.PI / 4 - (this.timer / 0.3) * Math.PI; // Swing
+                }
+                if (this.timer > 0.3) {
+                    this.state = 'idle'; this.timer = 0; 
+                    if (this.armR) { this.armR.rotation.set(0,0,0); }
+                }
+            } else if (this.state === 'summoning') {
+                this.speed = 0;
+                if (this.armL) this.armL.rotation.x = Math.PI; // Raise hand
+                if (this.timer > 1.0) {
+                    // Spawn
+                    const offsetX = (Math.random() - 0.5) * 8.0;
+                    const offsetZ = (Math.random() - 0.5) * 8.0;
+                    // Need a way to spawn enemy dynamically. We can't access spawnWave logic here easily without passing a callback.
+                    // But we likely don't have a 'spawnEnemy' callback in 'callbacks'. 
+                    // However, we can hack it by cloning a prototype or just creating a new Enemy3D if we had access to the class.
+                    // Since we are INSIDE the class, we can't 'new Enemy3D' easily if it's not imported or passed.
+                    // BUT, we can use a workaround: The `activePlants` is just for counting.
+                    // Actually, `spawnWave` in `world.js` doesn't pass a spawner.
+                    // Check callbacks... { playSound, DamageNumber, ... }
+                    // We might need to add a spawner callback.
+                    // For now, let's just make him 'throw' a seed that becomes a plant? 
+                    // Or we can rely on `this.scene` but we need to register it in the `enemies` array in `index.js`.
+                    // The `enemies` array is passed to `update`! 
+                    // `update(dt, playerPosition, camera, otherEnemies)` -> `otherEnemies` IS the list!
+                    
+                    // CRITICAL: We need `ENEMY_TYPES` config to spawn. It is imported at top.
+                    // We need `Enemy3D` class. It is the class we are in.
+                    
+                    // So:
+                    const p = this.mesh.position.clone().add(new this.THREE.Vector3(offsetX, 0, offsetZ));
+                    // Check bounds? Assume valid.
+                    const plant = new Enemy3D(this.scene, p.x, p.z, ENEMY_TYPES.SPITTER_PLANT, this.callbacks);
+                    
+                    // We need to add it to `otherEnemies` array.
+                    if (otherEnemies) otherEnemies.push(plant);
+                    this.activePlants.push(plant);
+                    
+                    this.state = 'idle'; this.timer = 0; this.plantCooldown = isEnraged ? 4.0 : 6.0;
+                    if (this.armL) this.armL.rotation.x = 0;
+                }
+            }
         } else if (this.config.name === 'Rat') {
             if (!this.state) this.state = 'idle';
+            if (!this.timer) this.timer = 0;
+            this.timer += dt;
+
             if (this.state === 'idle') {
                 this.speed = this.config.speed;
                 if (distToPlayer < 5.0 && distToPlayer > 1.5 && this.attackCooldown <= 0) {
-                     this.state = 'leaping'; this.attackCooldown = 2.0 + Math.random(); this.leapTime = 0; this.leapDuration = 0.6;
-                     this.leapStart = this.mesh.position.clone(); this.leapTarget = playerPosition.clone().add(this.callbacks.player.velocity.clone().multiplyScalar(0.3)).setY(this.config.yOffset);
-                     this.hasHitPlayer = false; if (this.callbacks.playSound) this.callbacks.playSound('dash', 0.5);
+                     this.state = 'winding'; this.timer = 0;
+                }
+            } else if (this.state === 'winding') {
+                this.speed = 0;
+                this.body.material.emissive.setHex(Math.floor(Date.now() * 0.05) % 2 === 0 ? 0xff0000 : 0x000000);
+                
+                if (this.timer > 0.5) {
+                     this.state = 'leaping'; 
+                     this.attackCooldown = 2.0 + Math.random(); 
+                     this.leapTime = 0; 
+                     this.leapDuration = 0.7; 
+                     this.leapStart = this.mesh.position.clone(); 
+                     this.leapTarget = playerPosition.clone().add(this.callbacks.player.velocity.clone().multiplyScalar(0.15)).setY(this.config.yOffset);
+                     this.hasHitPlayer = false; 
+                     this.body.material.emissive.setHex(0x000000);
+                     if (this.callbacks.playSound) this.callbacks.playSound('dash', 0.5);
                 }
             } else if (this.state === 'leaping') {
                 this.leapTime += dt; const t = Math.min(this.leapTime / this.leapDuration, 1.0);
@@ -523,17 +676,114 @@ export class Enemy3D {
             }
         } else if (this.config.name === 'Micro-Slime') {
             this.body.scale.set(1.0 + Math.sin(time * 15) * 0.2, 1.0 - Math.sin(time * 15) * 0.2, 1.0 + Math.sin(time * 15) * 0.2);
-        } else if (this.config.name === 'Wild Boar') {
+        } else if (this.config.name === 'Anti-Goose') {
             if (!this.state) this.state = 'idle';
             if (!this.timer) this.timer = 0;
             this.timer += dt;
+            if (!this.dashCooldown) this.dashCooldown = 0;
+            if (this.dashCooldown > 0) this.dashCooldown -= dt;
 
             if (this.state === 'idle') {
                 this.speed = this.config.speed;
-                if (this.timer > 2.0 + Math.random() * 2.0 && distToPlayer < 10.0) {
-                    this.state = 'winding'; this.timer = 0;
+                if (distToPlayer < 4.0 && this.dashCooldown <= 0) {
+                    this.state = 'pre_dash'; this.timer = 0;
                 }
-            } else if (this.state === 'winding') {
+            } else if (this.state === 'pre_dash') {
+                this.speed = 0;
+                this.mesh.lookAt(playerPosition.clone().setY(this.mesh.position.y));
+                if (Math.floor(Date.now() * 0.05) % 2 === 0) this.body.material.emissive.setHex(0xff0000);
+                else this.body.material.emissive.setHex(0x000000);
+                
+                if (this.timer > 0.4) {
+                    this.state = 'dashing'; this.timer = 0;
+                    this.dashDir = new this.THREE.Vector3().subVectors(playerPosition, this.mesh.position).normalize().setY(0);
+                    this.body.material.emissive.setHex(0x000000);
+                    if (this.callbacks.playSound) this.callbacks.playSound('dash', 0.8);
+                }
+                return true;
+            } else if (this.state === 'dashing') {
+                this.velocity.copy(this.dashDir).multiplyScalar(25.0);
+                this.mesh.position.add(this.velocity.clone().multiplyScalar(dt));
+                
+                // Trail
+                if (this.callbacks.vfxList && Math.random() < 0.5) {
+                    this.callbacks.vfxList.push(new this.callbacks.Particle(this.scene, this.mesh.position.clone(), 0x95a5a6));
+                }
+
+                if (distToPlayer < 1.0 && !this.callbacks.player.invulnerable && !this.callbacks.player.isDashing) {
+                    this.callbacks.player.takeDamage(1, this);
+                    if (this.callbacks.applyShake) this.callbacks.applyShake(0.2, 0.2);
+                }
+
+                if (this.timer > 0.3) {
+                    this.state = 'rest'; this.timer = 0;
+                }
+                return true;
+            } else if (this.state === 'rest') {
+                this.speed = 0;
+                if (this.timer > 1.0) {
+                    this.state = 'idle'; this.timer = 0;
+                    this.dashCooldown = 3.0;
+                }
+                return true;
+            }
+        } else if (this.config.name === 'Wild Boar') {
+            if (!this.state) this.state = 'chase';
+            if (!this.timer) this.timer = 0;
+            this.timer += dt;
+            
+            // Cooldowns
+            if (this.attackCooldown > 0) this.attackCooldown -= dt;
+            if (this.chargeCooldown > 0) this.chargeCooldown -= dt;
+            if (this.attackCooldown === undefined) this.attackCooldown = 0;
+            if (this.chargeCooldown === undefined) this.chargeCooldown = 0;
+
+            if (this.state === 'chase') {
+                this.speed = this.config.speed;
+                // Gore Trigger
+                if (distToPlayer < 2.0 && this.attackCooldown <= 0) {
+                    this.state = 'gore_winding'; this.timer = 0;
+                    return true;
+                }
+                // Charge Trigger
+                if (distToPlayer > 6.0 && this.chargeCooldown <= 0 && this.timer > 3.0) { 
+                    this.state = 'winding'; this.timer = 0;
+                    return true;
+                }
+                return false; // Fallthrough to updatePhysics (Seek)
+            } 
+            else if (this.state === 'gore_winding') {
+                this.speed = 0;
+                this.mesh.lookAt(playerPosition.clone().setY(this.mesh.position.y));
+                if (this.timer < 0.4) {
+                    this.body.material.emissive.setHex(Math.floor(Date.now() * 0.05) % 2 === 0 ? 0xff0000 : 0x000000); // Red flash
+                } else {
+                    this.state = 'gore_thrust'; this.timer = 0;
+                    this.goreDir = new this.THREE.Vector3().subVectors(playerPosition, this.mesh.position).normalize().setY(0);
+                    this.body.material.emissive.setHex(0x000000);
+                    if (this.callbacks.playSound) this.callbacks.playSound('dash', 0.8);
+                }
+                return true;
+            }
+            else if (this.state === 'gore_thrust') {
+                 this.speed = 0;
+                 const lungeSpeed = 10.0;
+                 this.velocity.copy(this.goreDir).multiplyScalar(lungeSpeed);
+                 this.mesh.position.add(this.velocity.clone().multiplyScalar(dt)); 
+                 
+                 if (distToPlayer < 1.5 && !this.callbacks.player.invulnerable && !this.callbacks.player.isDashing) {
+                     this.callbacks.player.takeDamage(1, this);
+                     if (this.callbacks.applyShake) this.callbacks.applyShake(0.1, 0.1);
+                 }
+                 
+                 if (this.timer > 0.2) {
+                     this.state = 'chase'; 
+                     this.timer = 0; 
+                     this.attackCooldown = 1.5;
+                 }
+                 return true;
+            }
+            else if (this.state === 'winding') {
                 this.speed = 0;
                 if (this.timer < 0.05) {
                     const offset = (Math.random() - 0.5) * 1.4;
@@ -550,13 +800,18 @@ export class Enemy3D {
                     this.state = 'charging'; this.timer = 0;
                     this.body.material.emissive.setHex(0x000000);
                 }
+                return true;
             } else if (this.state === 'charging') {
                 this.velocity.copy(this.chargeDir).multiplyScalar(22.0);
+                this.mesh.position.add(this.velocity.clone().multiplyScalar(dt));
+
                 if (distToPlayer < this.config.hitRadius && !this.callbacks.player.invulnerable && !this.callbacks.player.isDashing) {
                     this.callbacks.player.takeDamage(2, this);
                     this.callbacks.player.velocity.add(this.chargeDir.clone().multiplyScalar(15.0));
                 }
-                if (this.timer > 2.5) { this.state = 'rest'; this.timer = 0; }
+                if (this.timer > 2.5) { 
+                    this.state = 'rest'; this.timer = 0; 
+                }
                 this.healthBarGroup.lookAt(camera.position); return true; 
             } else if (this.state === 'rest') {
                 this.speed = 0;
@@ -565,7 +820,12 @@ export class Enemy3D {
                     const p = new this.callbacks.Particle(this.scene, this.mesh.position.clone().add(new this.THREE.Vector3(0,0.8,0.5)), 0xaaaaaa);
                     p.velocity.set(0, 2, 0); this.callbacks.vfxList.push(p);
                 }
-                if (this.timer > 2.0) { this.state = 'idle'; this.timer = 0; this.body.rotation.x = 0; }
+                if (this.timer > 2.0) { 
+                    this.state = 'chase'; this.timer = 0; 
+                    this.body.rotation.x = 0; 
+                    this.chargeCooldown = 4.0;
+                }
+                return true;
             }
         } else if (this.config.name === 'Bull') {
             const isRaging = this.hp < this.maxHp * 0.5;

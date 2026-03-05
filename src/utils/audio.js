@@ -59,4 +59,13 @@ export function playSound(type, volume = 1.0) {
             o.stop(now + i * 0.1 + 0.2);
         });
     }
+    else if (type === 'tick') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(800, now);
+        osc.frequency.exponentialRampToValueAtTime(600, now + 0.05);
+        gain.gain.setValueAtTime(0.5 * v, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+        osc.start(now);
+        osc.stop(now + 0.05);
+    }
 }

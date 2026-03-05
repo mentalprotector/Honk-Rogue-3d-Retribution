@@ -20,10 +20,8 @@ export class InputHandler3D {
 
         this._initListeners();
         
-        // Initial mobile check
-        if (this.isMobile) {
-            this.showControls();
-        }
+        // Always show controls for cooldown visibility
+        this.showControls();
     }
 
     showControls() {

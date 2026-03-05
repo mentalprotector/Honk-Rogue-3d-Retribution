@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { CONFIG, ENEMY_TYPES } from '../data/config.js';
+import { LEVEL_CONFIG } from '../data/levels.js';
 
 /**
  * Grass Grid Logic
@@ -79,7 +80,6 @@ export function spawnWave(lvl, scene, player, enemies, ENEMY_TYPES, Enemy3DClass
             e.maxHp = Math.ceil(e.maxHp * scale);
             e.hp = e.maxHp;
         }
-        enemies.push(e);
         return e;
     };
 
@@ -87,7 +87,6 @@ export function spawnWave(lvl, scene, player, enemies, ENEMY_TYPES, Enemy3DClass
         let x, z, safe = false;
         let attempts = 0;
         const pPos = player.mesh.position;
-        // console.log("SpawnWave DEBUG: Player at", pPos.x, pPos.z, "Range", range);
         do {
             x = (Math.random() - 0.5) * 2 * range;
             z = (Math.random() - 0.5) * 2 * range;
@@ -104,75 +103,59 @@ export function spawnWave(lvl, scene, player, enemies, ENEMY_TYPES, Enemy3DClass
         return { x, z };
     };
 
-    let stageTitle = "";
-    if (lvl === 1) {
-        stageTitle = "THE GARDEN: FLY INFESTATION";
-        for(let i=0; i<5; i++) { const p = getRandomPos(); spawnEnemy(ENEMY_TYPES.FLY, p.x, p.z); }
-    } else if (lvl === 2) {
-        stageTitle = "THE GARDEN: RAT PROBLEM";
-        for(let i=0; i<6; i++) { const p = getRandomPos(); spawnEnemy(ENEMY_TYPES.RAT, p.x, p.z); }
-    } else if (lvl === 3) {
-        stageTitle = "THE GARDEN: CAT PATROL";
-        for(let i=0; i<4; i++) { const p = getRandomPos(); spawnEnemy(ENEMY_TYPES.CAT, p.x, p.z); }
-    } else if (lvl === 4) {
-        stageTitle = "THE GARDEN: ANTI-GOOSE";
-        const p = getRandomPos(); spawnEnemy(ENEMY_TYPES.ANTI_GOOSE, p.x, p.z);
-    } else if (lvl === 5) {
-        stageTitle = "BOSS: THE GARDENER";
-        const p = getRandomPos(); spawnEnemy(ENEMY_TYPES.HUMAN, p.x, p.z);
-    } else if (lvl === 6) {
-        stageTitle = "THE BACKYARD: TOAD SPRINGS";
-        for(let i=0; i<6; i++) { const p = getRandomPos(); spawnEnemy(ENEMY_TYPES.SLIME, p.x, p.z); }
-    } else if (lvl === 7) {
-        stageTitle = "THE BACKYARD: MARSH TEAM";
-        for(let i=0; i<4; i++) { const p = getRandomPos(); spawnEnemy(ENEMY_TYPES.SLIME, p.x, p.z); }
-        for(let i=0; i<3; i++) { const p = getRandomPos(); spawnEnemy(ENEMY_TYPES.CAT, p.x, p.z); }
-    } else if (lvl === 8) {
-        stageTitle = "THE BACKYARD: THE SUPERVISOR";
-        for(let i=0; i<4; i++) { const p = getRandomPos(); spawnEnemy(ENEMY_TYPES.SLIME, p.x, p.z); }
-        const p = getRandomPos(); spawnEnemy(ENEMY_TYPES.HUMAN, p.x, p.z);
-    } else if (lvl === 9) {
-        stageTitle = "THE BACKYARD: RAT SWARM!";
-        for(let i=0; i<30; i++) { const p = getRandomPos(); spawnEnemy(ENEMY_TYPES.RAT, p.x, p.z); }
-    } else if (lvl === 10) {
-        stageTitle = "BOSS: THE RAGING BULL";
-        const p = { x: 0, z: 8 }; spawnEnemy(ENEMY_TYPES.BULL, p.x, p.z);
-    } else if (lvl === 11) {
-        stageTitle = "THE DEEP WOODS: BOAR RUSH";
-        for(let i=0; i<3; i++) { const p = getRandomPos(); spawnEnemy(ENEMY_TYPES.WILD_BOAR, p.x, p.z); }
-        for(let i=0; i<8; i++) { const p = getRandomPos(); spawnEnemy(ENEMY_TYPES.RAT, p.x, p.z); }
-    } else if (lvl === 12) {
-        stageTitle = "THE DEEP WOODS: THE MENAGERIE";
-        Object.keys(ENEMY_TYPES).forEach(key => {
-            if (key !== 'BULL' && key !== 'ANTI_GOOSE') {
-                const p = getRandomPos(); spawnEnemy(ENEMY_TYPES[key], p.x, p.z);
-            }
-        });
-    } else if (lvl === 13) {
-        stageTitle = "THE DEEP WOODS: PINE NEEDLE STORM";
-        for(let i=0; i<50; i++) { const p = getRandomPos(); const e = spawnEnemy(ENEMY_TYPES.FLY, p.x, p.z); e.speed *= 1.2; }
-        for(let i=0; i<10; i++) { const p = getRandomPos(); spawnEnemy(ENEMY_TYPES.MICRO_SLIME, p.x, p.z); }
-        for(let i=0; i<3; i++) { const p = getRandomPos(); spawnEnemy(ENEMY_TYPES.ANTI_GOOSE, p.x, p.z); }
-    } else if (lvl === 14) {
-        stageTitle = "THE DEEP WOODS: BARRAGE OF THE ANCIENTS";
-        for(let i=0; i<10; i++) { const p = getRandomPos(); spawnEnemy(ENEMY_TYPES.SLIME, p.x, p.z); }
-        for(let i=0; i<3; i++) { const p = getRandomPos(); spawnEnemy(ENEMY_TYPES.HUMAN, p.x, p.z); }
-        for(let i=0; i<2; i++) { const p = getRandomPos(); spawnEnemy(ENEMY_TYPES.WILD_BOAR, p.x, p.z); }
-    } else if (lvl === 15) {
-        stageTitle = "THE DEEP WOODS: THE ETERNAL HUNT";
-        for(let i=0; i<8; i++) { const p = getRandomPos(); spawnEnemy(ENEMY_TYPES.WILD_BOAR, p.x, p.z); }
-        for(let i=0; i<8; i++) { const p = getRandomPos(); spawnEnemy(ENEMY_TYPES.CAT, p.x, p.z); }
-        for(let i=0; i<20; i++) { const p = getRandomPos(); spawnEnemy(ENEMY_TYPES.RAT, p.x, p.z); }
-    } else if (lvl === 16) {
-        stageTitle = "BOSS: THE FOREST TITAN";
-        const p = { x: 0, z: 8 }; const e = spawnEnemy(ENEMY_TYPES.BULL, p.x, p.z);
-        e.maxHp = 200; e.hp = 200; e.speed = 2.2;
-        for(let i=0; i<4; i++) { const bp = getRandomPos(); spawnEnemy(ENEMY_TYPES.WILD_BOAR, bp.x, bp.z); }
+    const config = LEVEL_CONFIG[lvl];
+    let stageTitle = `LEVEL ${lvl}`;
+
+    if (config) {
+        stageTitle = config.title;
+        
+        if (config.customSpawn && lvl === 12) {
+            // Level 12 Special Logic (Menagerie)
+            Object.keys(ENEMY_TYPES).forEach(key => {
+                if (key !== 'BULL' && key !== 'ANTI_GOOSE' && key !== 'GARDENER') {
+                    const p = getRandomPos(); 
+                    const e = spawnEnemy(ENEMY_TYPES[key], p.x, p.z);
+                    enemies.push(e);
+                }
+            });
+        }
+        
+        if (config.spawns) {
+            config.spawns.forEach(spawn => {
+                const typeConfig = ENEMY_TYPES[spawn.type];
+                if (!typeConfig) {
+                    console.error(`SpawnWave: Unknown enemy type ${spawn.type}`);
+                    return;
+                }
+                
+                for (let i = 0; i < spawn.count; i++) {
+                    let x, z;
+                    if (spawn.pos) {
+                        x = spawn.pos.x;
+                        z = spawn.pos.z;
+                    } else {
+                        const p = getRandomPos();
+                        x = p.x;
+                        z = p.z;
+                    }
+                    
+                    const e = spawnEnemy(typeConfig, x, z);
+                    
+                    // Apply overrides
+                    if (spawn.speedMul) e.speed *= spawn.speedMul;
+                    if (spawn.stats) {
+                        Object.assign(e, spawn.stats);
+                    }
+                    
+                    enemies.push(e);
+                }
+            });
+        }
     }
     
     const badge = document.getElementById('stage-badge');
     if (badge) badge.innerText = `STAGE ${lvl}`;
-    if (callbacks.showMessage) callbacks.showMessage(stageTitle || `LEVEL ${lvl}`);
+    if (callbacks.showMessage) callbacks.showMessage(stageTitle);
 
     return {};
 }

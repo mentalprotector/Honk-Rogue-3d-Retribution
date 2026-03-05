@@ -62,6 +62,8 @@ export class Player3D {
         this.upgradeLevels = {}; // Map of id -> level
         this.permanentSpeedMul = 1.0;
         this.permanentDashCdMod = 0;
+        this.lastSeenOptions = [];
+        this.isAutoAttacking = false;
 
         this.frameCount = 0; // For throttling UI updates
 
@@ -309,6 +311,7 @@ export class Player3D {
         this.aspect = null;
         this.dashMod = null;
         this.upgradeLevels = {}; // Map of id -> level
+        this.lastSeenOptions = [];
         this.permanentSpeedMul = 1.0;
         this.permanentDashCdMod = 0;
         this.dashCooldownMax = BALANCE.PLAYER.DASH.COOLDOWN;
@@ -594,6 +597,7 @@ export class Player3D {
                     p.mesh.material.color.setHex(0x8e44ad);
                     p.mesh.material.emissive.setHex(0x4a148c);
                     p.mesh.material.emissiveIntensity = 0.8;
+                    p.radius = 0.5;
                 }
                 if (this.hasEcho) {
                     const echoLevel = this.upgradeLevels['echo'] || 1;
@@ -606,6 +610,7 @@ export class Player3D {
                            p2.mesh.material.color.setHex(0x8e44ad);
                            p2.mesh.material.emissive.setHex(0x4a148c);
                            p2.mesh.material.emissiveIntensity = 0.8;
+                           p2.radius = 0.5;
                         }
                     }
                 }
@@ -880,6 +885,7 @@ export class Player3D {
                 p.mesh.material.emissive.setHex(0x8e44ad);
                 p.mesh.material.emissiveIntensity = 1.0;
                 p.isMagic = true; 
+                p.radius = 0.4;
             }
         }
 
@@ -996,7 +1002,7 @@ export class Player3D {
         }
         const chargeLimit = Math.max(0.2, BALANCE.PLAYER.WEAPONS.GRIMOIRE.CHARGE_TIME - chargeBonus);
         
-        if (isAttackPressed) {
+        if (isAttackPressed || this.isAutoAttacking) {
             this.isCharging = true;
             this.chargeTime += dt;
             const progress = Math.min(this.chargeTime / chargeLimit, 1);
@@ -1046,9 +1052,23 @@ export class Player3D {
                 this.targetMarker.scale.setScalar(targetScale + Math.sin(Date.now() * 0.01) * 0.1);
                 this.targetMarker.rotation.z += dt * 2.0;
             }
-            // Auto-attack trigger (Increased range to 4.0 for better responsiveness)
-            if (minDist < 4.0 && this.attackCooldown <= 0 && !this.isAttacking && !this.isDashing && this.weapon !== 'grimoire') {
-                this.attack();
+            // Auto-attack trigger with dynamic range
+            let aaRange = 2.5; 
+            if (this.weapon === 'bat') aaRange = 3.5;
+            else if (this.weapon === 'shuriken') aaRange = 8.0;
+            else if (this.weapon === 'molten_breath') aaRange = 5.0;
+            else if (this.weapon === 'icicle_spit') aaRange = 7.0;
+            else if (this.weapon === 'void_orb') aaRange = 6.0;
+            else if (this.weapon === 'grimoire') aaRange = 6.0;
+
+            this.isAutoAttacking = false;
+
+            if (minDist < aaRange && this.attackCooldown <= 0 && !this.isAttacking && !this.isDashing) {
+                if (this.weapon === 'grimoire') {
+                    this.isAutoAttacking = true;
+                } else {
+                    this.attack();
+                }
             }
         } else {
             if (inputVector.length() > 0.1) this.currentAimTarget = this.mesh.position.clone().add(inputVector);

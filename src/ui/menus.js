@@ -1,34 +1,5 @@
 import { UPGRADES_REGISTRY } from '../data/registry.js';
-
-function calculateWeights(pool, player) {
-    const playerTags = new Set();
-    if (player.upgradeLevels) {
-        for (const id in player.upgradeLevels) {
-            const u = UPGRADES_REGISTRY.find(up => up.id === id);
-            if (u && u.tags) u.tags.forEach(t => playerTags.add(t));
-        }
-    }
-
-    return pool.map(item => {
-        let weight = 100;
-        if (item.tags) {
-            const matchCount = item.tags.filter(t => playerTags.has(t)).length;
-            weight += matchCount * 50;
-        }
-        return { item, weight };
-    });
-}
-
-function pickWeighted(weightedPool) {
-    if (weightedPool.length === 0) return null;
-    const totalWeight = weightedPool.reduce((a, b) => a + b.weight, 0);
-    let r = Math.random() * totalWeight;
-    for (const entry of weightedPool) {
-        r -= entry.weight;
-        if (r <= 0) return entry.item;
-    }
-    return weightedPool[0].item;
-}
+import { getUpgradeChoices } from '../core/loot.js';
 
 export function setGameStateUI(newState, STATE_ENUM, options = {}) {
     const uiMenu = document.getElementById('menu-overlay');
@@ -75,7 +46,7 @@ export function setGameStateUI(newState, STATE_ENUM, options = {}) {
     }
 }
 
-export function showUpgradeMenu(player, level, UPGRADES_REGISTRY, callbacks = {}) {
+export function showUpgradeMenu(player, level, callbacks = {}) {
     const uiUpgrade = document.getElementById('upgrade-overlay');
     const cardsContainer = document.getElementById('cards-container');
     if (!uiUpgrade || !cardsContainer) return;
@@ -84,97 +55,10 @@ export function showUpgradeMenu(player, level, UPGRADES_REGISTRY, callbacks = {}
     cardsContainer.innerHTML = '';
     if (callbacks.playSound) callbacks.playSound('upgrade');
 
-    const choices = [];
-    
-    // Helper to pick N items using weighted logic
-    const getWeightedFromPool = (pool, count = 1) => {
-        const selected = [];
-        let currentPool = [...pool];
-        for(let i=0; i<count; i++) {
-            if (currentPool.length === 0) break;
-            const weighted = calculateWeights(currentPool, player);
-            const picked = pickWeighted(weighted);
-            if (picked) {
-                selected.push(picked);
-                // Only remove from pool if it's a one-time upgrade OR if we want to force variety
-                // To allow 'duplicate drops' (multiple cards of same upgrade), we only filter if maxLevel is 1
-                if (picked.maxLevel === 1) {
-                    currentPool = currentPool.filter(u => u.id !== picked.id);
-                }
-            }
-        }
-        return selected;
-    };
+    // Use the Smart Deck Loot System
+    const choices = getUpgradeChoices(player, level);
 
-    const isMaxed = (u) => {
-        const currentLevel = player.upgradeLevels[u.id] || 0;
-        return currentLevel >= (u.maxLevel || 1);
-    };
-
-    const fullPool = UPGRADES_REGISTRY.filter(u => !isMaxed(u));
-
-    if (level <= 5) {
-        const dashPool = fullPool.filter(u => u.type === 'dash_mod');
-        const statPool = fullPool.filter(u => u.type === 'stat');
-        const passivePool = fullPool.filter(u => u.type === 'passive');
-
-        if (level === 1) {
-            const knife = fullPool.find(u => u.id === 'knife');
-            if (knife) choices.push(knife);
-            choices.push(...getWeightedFromPool(dashPool, 1));
-            choices.push(...getWeightedFromPool(statPool, 1));
-        } else if (level === 2) {
-            const bat = fullPool.find(u => u.id === 'bat');
-            if (bat) choices.push(bat);
-            choices.push(...getWeightedFromPool(dashPool, 1));
-            choices.push(...getWeightedFromPool(statPool, 1));
-        } else if (level === 3) {
-            const shuriken = fullPool.find(u => u.id === 'shuriken');
-            if (shuriken) choices.push(shuriken);
-            choices.push(...getWeightedFromPool(dashPool, 1));
-            choices.push(...getWeightedFromPool(statPool, 1));
-        } else if (level === 4) {
-            const grimoire = fullPool.find(u => u.id === 'grimoire');
-            if (grimoire) choices.push(grimoire);
-            choices.push(...getWeightedFromPool(passivePool, 1));
-            choices.push(...getWeightedFromPool(statPool, 1));
-        } else if (level === 5) {
-            const aspects = fullPool.filter(u => u.type === 'aspect' && u.weapon === player.weapon);
-            choices.push(...aspects.slice(0, 3));
-        }
-        
-        // Fill remaining slots
-        while (choices.length < 3) {
-            const filler = getWeightedFromPool(fullPool.filter(u => !choices.find(c => c.id === u.id)), 1)[0];
-            if (filler) choices.push(filler);
-            else break;
-        }
-    } else {
-        let replacementsOffered = 0;
-        const pool = fullPool.filter(u => {
-            if (choices.find(c => c.id === u.id)) return false;
-            
-            // Limit replacements (swapping weapons/aspects) to 1 per menu
-            const isWeaponSwap = u.type === 'weapon' && player.weapon !== 'peck' && u.id !== player.weapon;
-            const isAspectSwap = u.type === 'aspect' && player.aspect && u.id !== player.aspect;
-            const isDashSwap = u.type === 'dash_mod' && player.dashMod && u.id !== player.dashMod;
-            const isSwap = isWeaponSwap || isAspectSwap || isDashSwap;
-
-            if (isSwap && replacementsOffered >= 1) return false;
-            if (isSwap) replacementsOffered++;
-            
-            // Aspect filtering: only show aspects for the current weapon
-            if (u.type === 'aspect' && u.weapon !== player.weapon) return false;
-            
-            return true;
-        });
-
-        // Pick 3 Weighted
-        const picked = getWeightedFromPool(pool, 3);
-        choices.push(...picked);
-    }
-
-    choices.slice(0, 3).forEach((u, index) => {
+    choices.forEach((u, index) => {
         const card = document.createElement('div');
         card.className = "glass-panel upgrade-card";
         const iconMap = {
@@ -202,6 +86,8 @@ export function showUpgradeMenu(player, level, UPGRADES_REGISTRY, callbacks = {}
         
         if (isSwap) {
             let currentName = "Unknown";
+            // We import UPGRADES_REGISTRY locally in loot.js, but here we might need it for name lookup if passing IGNORED
+            // Actually we can import it at top of file
             if (u.type === 'weapon') currentName = UPGRADES_REGISTRY.find(item => item.id === player.weapon)?.name || player.weapon;
             if (u.type === 'aspect') currentName = UPGRADES_REGISTRY.find(item => item.id === player.aspect)?.name || player.aspect;
             if (u.type === 'dash_mod') currentName = UPGRADES_REGISTRY.find(item => item.id === player.dashMod)?.name || player.dashMod;
@@ -278,7 +164,7 @@ export function showUpgradeMenu(player, level, UPGRADES_REGISTRY, callbacks = {}
             ${replacesText}
         `;
         
-        card.onclick = (e) => { e.stopPropagation(); selectUpgrade(u, card, player, UPGRADES_REGISTRY, callbacks); };
+        card.onclick = (e) => { e.stopPropagation(); selectUpgrade(u, card, player, callbacks); };
         cardsContainer.appendChild(card);
     });
 
@@ -302,7 +188,7 @@ export function showUpgradeMenu(player, level, UPGRADES_REGISTRY, callbacks = {}
     uiUpgrade.appendChild(skipBtn);
 }
 
-export function selectUpgrade(u, selectedCardElement, player, UPGRADES_REGISTRY, callbacks = {}) {
+export function selectUpgrade(u, selectedCardElement, player, callbacks = {}) {
     if (selectedCardElement) {
         selectedCardElement.style.transform = 'scale(1.2)';
         selectedCardElement.style.opacity = '0';
@@ -318,6 +204,12 @@ export function selectUpgrade(u, selectedCardElement, player, UPGRADES_REGISTRY,
     }
 
     setTimeout(() => {
+        // Fatigue System: Remove the PICKED item from history so it isn't penalized next time.
+        // Only unpicked items remain in lastSeenOptions and get the 0.2x weight penalty.
+        if (player.lastSeenOptions) {
+            player.lastSeenOptions = player.lastSeenOptions.filter(id => id !== u.id);
+        }
+
         player.addUpgrade(u.id, callbacks);
 
         document.getElementById('upgrade-overlay').style.display = 'none';
